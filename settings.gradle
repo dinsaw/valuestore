@@ -1,0 +1,5 @@
+rootProject.name = 'valuestore'
+include 'web'
+include 'ingest'
+include 'common'
+include 'launcher'
