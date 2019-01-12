@@ -42,7 +42,7 @@ public class Server extends AbstractVerticle {
     }
 
     private void initMongoClient() {
-        mongoClient = Config.mongoClient(vertx);
+        mongoClient = Config.mongoClient(vertx, config());
     }
 
     private void createDbIndexes() {

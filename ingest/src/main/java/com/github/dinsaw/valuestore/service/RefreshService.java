@@ -2,18 +2,25 @@ package com.github.dinsaw.valuestore.service;
 
 import com.github.dinsaw.navparser.dto.MutualFund;
 import com.github.dinsaw.navparser.india.AmfiIndiaNavParser;
+import com.github.dinsaw.valuestore.collections.ArrayBatchPusher;
+import com.github.dinsaw.valuestore.collections.BatchPusher;
 import com.github.dinsaw.valuestore.util.AppConstants;
 import com.github.dinsaw.valuestore.util.AsyncUtils;
 import com.github.dinsaw.valuestore.util.DateUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.mongo.UpdateOptions;
+import io.vertx.ext.mongo.*;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.github.dinsaw.valuestore.util.AppConstants.NET_ASSET_VALUES;
 import static com.github.dinsaw.valuestore.util.MongoUtils.updateObject;
@@ -36,10 +43,12 @@ public class RefreshService implements Handler<Long> {
         webClient.get(80, "www.amfiindia.com", "/spages/NAVAll.txt")
                     .ssl(false)
                     .send(ar -> {
+                        List<MutualFund> mutualFunds = new ArrayList<>(500);
                         if (ar.succeeded()) {
                             HttpResponse<Buffer> response = ar.result();
                             String text = response.bodyAsString();
                             String[] lines = text.split("\n");
+                            BatchPusher<MutualFund> pusher = new ArrayBatchPusher<>(1000, this::saveMutualFunds);
                             for (String line: lines) {
                                 if (navParser.isHeader(line) || navParser.shouldSkip(line))  {
                                     continue;
@@ -47,7 +56,9 @@ public class RefreshService implements Handler<Long> {
                                 log.debug("Processing line {}", line);
 
                                 navParser.parseLine(line.trim())
-                                    .ifPresent(m -> saveMutualFund(m));
+                                    .ifPresent(m -> pusher.add(m));
+
+                                pusher.flush();
                             }
 
                         } else {
@@ -56,11 +67,29 @@ public class RefreshService implements Handler<Long> {
                     });
     }
 
-    private MongoClient saveMutualFund(MutualFund m) {
+    private void saveMutualFunds(List<MutualFund> mutualFundList) {
+        List<BulkOperation> bulkOperations = mutualFundList.stream().map(m -> {
+            JsonObject checkQuery = new JsonObject().put(AppConstants.SCHEME_CODE, m.getSchemeCode());
+            return BulkOperation.createUpdate(checkQuery, updateObject(mutualFundJson(m)), true, false);
+        }).collect(Collectors.toList());
+
+        BulkWriteOptions bulkWriteOptions = new BulkWriteOptions().setWriteOption(WriteOption.ACKNOWLEDGED);
+        mongoClient.bulkWriteWithOptions("mutualFunds", bulkOperations, bulkWriteOptions, mr -> {
+            log.debug("Result after saving {}", mr.result());
+            if (mr.failed()) {
+                log.error("Saving failed.", mr.cause());
+            } else {
+                saveNavs(mutualFundList);
+            }
+        });
+    }
+
+
+    private void saveMutualFund(MutualFund m) {
         JsonObject checkQuery = new JsonObject().put(AppConstants.SCHEME_CODE, m.getSchemeCode());
         UpdateOptions updateOptions = new UpdateOptions().setUpsert(true);
 
-        return mongoClient.updateCollectionWithOptions("mutualFunds", checkQuery,
+        mongoClient.updateCollectionWithOptions("mutualFunds", checkQuery,
                             updateObject(mutualFundJson(m)),
                             updateOptions, mr -> {
                                 log.debug("Result after saving {}", mr.result());
@@ -72,7 +101,21 @@ public class RefreshService implements Handler<Long> {
                             });
     }
 
+    private void saveNavs(List<MutualFund> mutualFundList) {
+        List<BulkOperation> bulkOperations = mutualFundList.stream().map(m -> {
+            JsonObject navJsonObject = toNavJson(m);
+            JsonObject query = new JsonObject()
+                    .put(AppConstants.SCHEME_CODE, m.getSchemeCode())
+                    .put("date", DateUtils.mongoDate(m.getNavDate()));
+            return BulkOperation.createUpdate(query, updateObject(navJsonObject),
+                                        true, false);
 
+        }).collect(Collectors.toList());
+
+        BulkWriteOptions bulkWriteOptions = new BulkWriteOptions().setWriteOption(WriteOption.ACKNOWLEDGED);
+        mongoClient.bulkWriteWithOptions(NET_ASSET_VALUES, bulkOperations, bulkWriteOptions,
+                ar -> AsyncUtils.logIfFailed(ar, log));
+    }
 
     private void saveNav(MutualFund mutualFund) {
         JsonObject navJsonObject = toNavJson(mutualFund);

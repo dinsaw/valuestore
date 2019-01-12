@@ -25,7 +25,7 @@ public class App {
         });
 
         Vertx ingestVertx = Vertx.vertx();
-        ingestVertx.deployVerticle(new IngestVerticle());
+        ingestVertx.deployVerticle(new IngestVerticle(), options);
     }
 
     private static JsonObject getConfig(Vertx vertx) {

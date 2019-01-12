@@ -1,3 +1,10 @@
 {
-  "http.port": 8094
+  "http.port": 8094,
+  "mongo.db_name": "valueStore",
+  "mongo.connection_string": "mongodb://127.0.0.1:27017",
+  "mongo.username": "valueUser",
+  "mongo.password": "Password*2018",
+  "mongo.heartbeatFrequencyMS": 1000000,
+  "mongo.minHeartbeatFrequencyMS": 1000000,
+  "mongo.waitQueueMultiple": 1000
 }
