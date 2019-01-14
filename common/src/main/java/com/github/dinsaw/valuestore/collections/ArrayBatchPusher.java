@@ -1,9 +1,12 @@
 package com.github.dinsaw.valuestore.collections;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+@Slf4j
 public class ArrayBatchPusher<T> implements BatchPusher<T> {
 
     private List<T> elements;
@@ -33,6 +36,7 @@ public class ArrayBatchPusher<T> implements BatchPusher<T> {
     @Override
     public void flush() {
         if (elements.isEmpty()) { return; }
+        log.info("Flushing {} elements", elements.size());
         consumer.accept(elements);
         elements = new ArrayList<T>(batchSize);
     }

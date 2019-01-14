@@ -57,10 +57,8 @@ public class RefreshService implements Handler<Long> {
 
                                 navParser.parseLine(line.trim())
                                     .ifPresent(m -> pusher.add(m));
-
-                                pusher.flush();
                             }
-
+                            pusher.flush();
                         } else {
                             log.error("Failed to access refresh URL", ar.cause());
                         }
@@ -92,7 +90,7 @@ public class RefreshService implements Handler<Long> {
         mongoClient.updateCollectionWithOptions("mutualFunds", checkQuery,
                             updateObject(mutualFundJson(m)),
                             updateOptions, mr -> {
-                                log.debug("Result after saving {}", mr.result());
+                                log.debug("Result after saving {}", mr.result().toJson());
                                 if (mr.failed()) {
                                     log.error("Saving failed.", mr.cause());
                                 } else {

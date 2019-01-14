@@ -22,9 +22,10 @@ public class IngestVerticle extends AbstractVerticle{
     public void start() throws Exception {
         log.debug("Starting Ingest Verticle");
 
-        vertx.setTimer(5000, buildRefreshService());
+        vertx.setTimer(config().getInteger("valueStore.ingestStartupTimerInSeconds") * 1000,
+                                buildRefreshService());
 
-        long refreshDelay = Duration.of(6, ChronoUnit.HOURS).toMillis();
+        long refreshDelay = Duration.of(config().getInteger("valueStore.ingestDelayInHours"), ChronoUnit.HOURS).toMillis();
         vertx.setPeriodic(refreshDelay, buildRefreshService());
 
     }

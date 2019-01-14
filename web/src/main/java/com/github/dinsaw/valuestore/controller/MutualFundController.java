@@ -3,6 +3,7 @@ package com.github.dinsaw.valuestore.controller;
 import com.github.dinsaw.valuestore.util.AppConstants;
 import com.github.dinsaw.valuestore.util.MongoUtils;
 import com.github.dinsaw.valuestore.util.Pagination;
+import com.github.dinsaw.valuestore.util.RestPathConstants;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -15,6 +16,8 @@ import java.util.List;
 import static com.github.dinsaw.valuestore.util.AppConstants.SCHEME_CODE;
 import static com.github.dinsaw.valuestore.util.MongoConstants.ASC;
 import static com.github.dinsaw.valuestore.util.MongoConstants.GT;
+import static com.github.dinsaw.valuestore.util.RestPathConstants.*;
+import static com.github.dinsaw.valuestore.util.RestPathConstants.SCHEME_CODE_PARAM;
 import static com.github.dinsaw.valuestore.util.WebConstants.APPLICATION_JSON_UTF_8;
 import static com.github.dinsaw.valuestore.util.WebConstants.CONTENT_TYPE;
 
@@ -57,7 +60,12 @@ public class MutualFundController {
         JsonObject dateJsonObject = result.getJsonObject("navDate");
         result.put("navDate", MongoUtils.getDate(dateJsonObject))
                 .remove("_id");
+        result.put(NET_ASSET_VALUES_URL_KEY, getNavPath(result));
         return result;
+    }
+
+    private String getNavPath(JsonObject result) {
+        return GET_MF_NAV_PATH.replace(SCHEME_CODE_PARAM, result.getString(SCHEME_CODE));
     }
 
     private List<JsonObject> convert(List<JsonObject> resultList) {

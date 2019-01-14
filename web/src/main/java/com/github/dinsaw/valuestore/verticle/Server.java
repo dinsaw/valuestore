@@ -4,6 +4,7 @@ import com.github.dinsaw.valuestore.Config;
 import com.github.dinsaw.valuestore.controller.MutualFundController;
 import com.github.dinsaw.valuestore.controller.NavController;
 import com.github.dinsaw.valuestore.service.InfoService;
+import com.github.dinsaw.valuestore.util.RestPathConstants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -17,6 +18,7 @@ import static com.github.dinsaw.valuestore.util.AppConstants.NET_ASSET_VALUES;
 import static com.github.dinsaw.valuestore.util.AsyncUtils.logIfFailed;
 import static com.github.dinsaw.valuestore.util.MongoConstants.ASC;
 import static com.github.dinsaw.valuestore.util.MongoConstants.DESC;
+import static com.github.dinsaw.valuestore.util.RestPathConstants.GET_MF_NAV_PATH;
 import static com.github.dinsaw.valuestore.util.WebConstants.*;
 
 /**
@@ -76,10 +78,10 @@ public class Server extends AbstractVerticle {
                                 .end(Json.encodePrettily(infoService.greet())));
 
         MutualFundController mutualFundController = new MutualFundController(mongoClient);
-        router.get("/mutualFunds/:schemeCode").handler(mutualFundController::getBySchemeCode);
-        router.get("/mutualFunds").handler(mutualFundController::getAll);
+        router.get(RestPathConstants.GET_MUTUAL_FUND_PATH).handler(mutualFundController::getBySchemeCode);
+        router.get(RestPathConstants.MUTUAL_FUNDS_BASE).handler(mutualFundController::getAll);
 
         NavController navController = new NavController(mongoClient);
-        router.get("/mutualFunds/:schemeCode/netAssetValues").handler(navController::getBySchemeCode);
+        router.get(GET_MF_NAV_PATH).handler(navController::getBySchemeCode);
     }
 }

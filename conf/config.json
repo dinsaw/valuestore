@@ -1,5 +1,7 @@
 {
   "http.port": 8094,
+  "valueStore.ingestDelayInHours": 6,
+  "valueStore.ingestStartupTimerInSeconds": 10,
   "mongo.db_name": "valueStore",
   "mongo.connection_string": "mongodb://127.0.0.1:27017",
   "mongo.username": "valueUser",
