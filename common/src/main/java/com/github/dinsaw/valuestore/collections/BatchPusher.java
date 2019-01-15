@@ -4,4 +4,5 @@ public interface BatchPusher<T> {
     void add(T input);
     int size();
     void flush();
+    Long getFlushCount();
 }
