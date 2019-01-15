@@ -40,7 +40,7 @@ public class ArrayBatchPusherTest {
     }
 
     private void consume(List<String> a) {
-        log.debug("Consumed {}", a);
+        log.debug("Consumed elements : {} ", a);
     }
 
     @Test
