@@ -30,7 +30,7 @@ public class App {
 
     private static JsonObject getConfig(Vertx vertx) {
         JsonObject json = vertx.getOrCreateContext().config();
-        log.info("Current Dir {}", json);
+        log.info("Current Dir {}", System.getProperty("user.dir"));
         if (json == null || json.isEmpty()) {
             return new JsonObject(
                     vertx.fileSystem()
