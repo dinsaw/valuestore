@@ -53,7 +53,6 @@ public class RefreshService implements Handler<Long> {
                                 if (navParser.isHeader(line) || navParser.shouldSkip(line))  {
                                     continue;
                                 }
-                                log.debug("Processing line {}", line);
 
                                 navParser.parseLine(line.trim())
                                     .ifPresent(m -> pusher.add(m));
