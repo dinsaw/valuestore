@@ -7,6 +7,5 @@ WORKDIR /apps
 EXPOSE 8094
 
 COPY conf /apps/conf
-ADD launcher/build/libs/launcher-0.0.1-SNAPSHOT-all.jar /apps/
-RUN java -jar /apps/launcher-0.0.1-SNAPSHOT-all.jar
-# RUN ls /apps
+COPY launcher/build/libs/launcher-0.0.1-SNAPSHOT-all.jar /apps/
+CMD java -jar /apps/launcher-0.0.1-SNAPSHOT-all.jar
