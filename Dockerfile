@@ -1,9 +1,6 @@
 FROM openjdk:8-jre-alpine
 MAINTAINER dnsh
 
-RUN apt-get update
-RUN apt-get upgrade -y
-
 RUN mkdir -p /apps
 WORKDIR /apps
 
