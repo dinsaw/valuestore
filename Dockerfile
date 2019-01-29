@@ -8,4 +8,5 @@ EXPOSE 8094
 
 ADD conf /apps/
 ADD launcher/build/libs/launcher-0.0.1-SNAPSHOT-all.jar /apps/
-RUN java -jar /apps/launcher-0.0.1-SNAPSHOT-all.jar
+# RUN java -jar /apps/launcher-0.0.1-SNAPSHOT-all.jar
+RUN ls /apps/conf
