@@ -31,7 +31,7 @@ public class App {
                 Vertx ingestVertx = Vertx.vertx();
                 ingestVertx.deployVerticle(new IngestVerticle(), options);
             } else {
-                log.error("Failed to get config");
+                log.error("Failed to get config", ar.cause());
             }
         });
     }
