@@ -6,6 +6,5 @@ WORKDIR /apps
 
 EXPOSE 8094
 
-COPY conf /apps/conf
 COPY launcher/build/libs/launcher-0.0.1-SNAPSHOT-all.jar /apps/
 CMD java -Dvertx.cacheDirBase=/tmp/vertx-cache -jar /apps/launcher-0.0.1-SNAPSHOT-all.jar
