@@ -6,4 +6,5 @@ public class RestPathConstants {
     public static final String GET_MUTUAL_FUND_PATH = MUTUAL_FUNDS_BASE + "/" + SCHEME_CODE_PARAM;
     public static final String GET_MF_NAV_PATH = MUTUAL_FUNDS_BASE + "/" + SCHEME_CODE_PARAM + "/netAssetValues";
     public static final String NET_ASSET_VALUES_URL_KEY = "netAssetValuesUrl";
+    public static final String HEALTH_PATH = "/health";
 }

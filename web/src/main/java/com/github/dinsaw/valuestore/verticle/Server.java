@@ -8,6 +8,8 @@ import com.github.dinsaw.valuestore.util.RestPathConstants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.healthchecks.HealthCheckHandler;
+import io.vertx.ext.healthchecks.Status;
 import io.vertx.ext.mongo.IndexOptions;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.web.Router;
@@ -83,5 +85,22 @@ public class Server extends AbstractVerticle {
 
         NavController navController = new NavController(mongoClient);
         router.get(GET_MF_NAV_PATH).handler(navController::getBySchemeCode);
+
+        HealthCheckHandler healthCheckHandler = getHealthCheckHandler(mongoClient);
+        router.get(RestPathConstants.HEALTH_PATH).handler(healthCheckHandler);
+    }
+
+    private HealthCheckHandler getHealthCheckHandler(MongoClient mongoClient) {
+        HealthCheckHandler healthCheckHandler = HealthCheckHandler.create(vertx);
+        healthCheckHandler.register("mongo-check", f -> {
+            mongoClient.getCollections(h -> {
+                if(h.succeeded()) {
+                    f.complete(Status.OK());
+                } else {
+                    f.complete(Status.KO(new JsonObject().put("cause", h.cause())));
+                }
+            });
+        });
+        return healthCheckHandler;
     }
 }
